@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/lg1">
+    <target
+        android:animation="@animator/lg1_move"
+        android:name="anim_group_lg1">
+    </target>
+</animated-vector>

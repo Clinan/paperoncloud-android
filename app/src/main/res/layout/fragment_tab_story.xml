@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/linearLayout_fragment_tab_story"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/voice_bg"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/voice_recyclerView_in_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
+        <!--<TextView-->
+            <!--android:layout_width="681px"-->
+            <!--android:layout_height="150px"-->
+            <!--android:layout_marginTop="150px"-->
+            <!--android:paddingLeft="180px"-->
+            <!--android:gravity="left|center_vertical"-->
+            <!--android:text="白雪公主"-->
+            <!--android:textColor="@android:color/black"-->
+            <!--android:textSize="60px"-->
+            <!--android:background="@drawable/voice_item_bg" />-->
+
+    </LinearLayout>
+
+
+</LinearLayout>

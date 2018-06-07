@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportHeight="1920.0"
+    android:viewportWidth="1080.0">
+    <group android:name="anim_group_lg1">
+
+        <path
+            android:pathData="M0,0
+            C202.5,55 482.5,130 607.5,282.5
+            c125,152.5 195,432.5 205,510
+            c10,77.5 -2.5,297.5 -157.5,365
+            c-155,67.5 -347.5,37.5 -445,-7.5
+            c-97.5,-45 -150,-290 -70,-392.5
+            c80,-102.5 275,-150 350,-112.5
+            c75,37.5 202.5,97.5 207.5,227.5
+            c5,130 -115,242.5 -192.5,232.5
+            c-77.5,-10 -227.5,-25 -297.5,-130
+            c-70,-105 62.5,-240 137.5,-222.5
+            c75,17.5 177.5,50 157.5,160
+            c-20,110 -150,65 -150,65
+            c0,0 -195,-122.5 -270,-240
+            c-75,-117.5 -80,-170 -81.3,-171.3"
+            android:strokeAlpha="1"
+            android:strokeColor="#000"
+            android:strokeWidth="1" />
+    </group>
+
+</vector>

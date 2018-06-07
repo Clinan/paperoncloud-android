@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sliding_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    sothree:umanoDragView="@+id/dragView"
+    sothree:umanoOverlay="true"
+    sothree:umanoPanelHeight="65dp"
+    sothree:umanoParallaxOffset="100dp"
+    sothree:umanoScrollableView="@+id/list"
+    sothree:umanoShadowHeight="4dp">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".VoiceActivity">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/voice_bill_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="140px"
+                android:background="#eaf7f9"
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:title="">
+
+                <ImageView
+                    android:layout_width="100px"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_keyboard_arrow_left_green_300_24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="1"
+                    android:onClick="callBackVoiceBtn"
+                    android:text="语音讲故事"
+                    android:textColor="@color/blue_one"
+                    android:textSize="60px" />
+            </android.support.v7.widget.Toolbar>
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tl_tab"
+                android:layout_width="match_parent"
+                android:layout_height="120px"
+                android:layout_gravity="fill"
+                android:background="@color/blue_one"
+                android:foregroundGravity="fill"
+                app:tabGravity="fill"
+                app:tabMode="fixed"
+                app:tabTextAppearance="@style/TabLayoutTextStyle">
+
+            </android.support.design.widget.TabLayout>
+        </android.support.design.widget.AppBarLayout>
+
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vp_content"
+            android:layout_width="match_parent"
+            android:paddingTop="260px"
+            android:paddingBottom="65dp"
+            android:layout_height="match_parent">
+
+        </android.support.v4.view.ViewPager>
+    </RelativeLayout>
+
+
+    <!-- SLIDING LAYOUT -->
+    <LinearLayout
+        android:id="@+id/dragView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffffff"
+        android:focusable="false"
+        android:orientation="vertical">
+
+        <include layout="@layout/voice_play_layout"/>
+
+    </LinearLayout>
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

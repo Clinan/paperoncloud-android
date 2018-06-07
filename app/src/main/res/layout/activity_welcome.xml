@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.quyue.paperoncloud.WelcomeActivity">
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_marginTop="150dp"
+        android:paddingTop="70dp"
+        android:paddingRight="70dp"
+        android:paddingLeft="83dp"
+        android:paddingBottom="20dp"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:alpha="0"
+            android:src="@drawable/logo2"/>
+
+        <ImageView
+            android:id="@+id/lg1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/lg1" />
+
+        <ImageView
+            android:id="@+id/lg2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/lg2" />
+
+        <ImageView
+            android:id="@+id/lg3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/lg3" />
+
+        <ImageView
+            android:id="@+id/lg4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/lg4" />
+
+        <ImageView
+            android:id="@+id/lg5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/lg5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="#2185cb"
+            android:textSize="12dp"
+            android:text="&#169;2018趣阅团队出品" />
+
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/jump_animation_btn_shape"
+        android:onClick="jumpAnimation"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+
+        android:text="跳过动画" />
+
+</RelativeLayout>

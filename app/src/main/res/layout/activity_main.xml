@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/index_bg"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/balloon"
+            android:layout_width="500px"
+            android:layout_height="478px"
+            android:layout_alignEnd="@+id/imageView2"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/index_bg2" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:adjustViewBounds="true"
+            android:scaleType="fitEnd"
+            android:src="@drawable/cloud"
+            android:id="@+id/imageView" />
+
+        <ImageView
+            android:layout_width="407px"
+            android:layout_height="407px"
+            android:layout_alignTop="@+id/imageView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="27dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/scan_center_icon"
+            android:id="@+id/imageView2" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="74px"
+                android:src="@drawable/scan_icon"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="100px"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="74px"
+                android:src="@drawable/voice"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="100px"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:onClick="voiceBtn"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="74px"
+                android:src="@drawable/user_center"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="100px"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:onClick="userCenterBtn"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</android.support.constraint.ConstraintLayout>
