@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.quyue.paperoncloud.R;
+import com.quyue.paperoncloud.adapter.RecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

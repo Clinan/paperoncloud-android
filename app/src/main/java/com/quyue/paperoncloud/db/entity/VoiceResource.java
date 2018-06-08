@@ -7,7 +7,7 @@ import org.litepal.crud.DataSupport;
  * Created by arter on 2018/6/8.
  */
 
-public class VoiceResource extends DataSupport {
+public class VoiceResource extends DataSupport implements BaseEntity {
 
     /**
      * 可以进行对象关系映射的数据类型一共有8种，int、short、long、float、double、boolean、String和Date

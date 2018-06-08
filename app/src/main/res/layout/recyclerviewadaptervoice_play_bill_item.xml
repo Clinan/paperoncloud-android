@@ -21,5 +21,11 @@
             android:text="白雪公主"
             android:textColor="@android:color/black"
             android:textSize="60px" />
+
+        <TextView
+            android:id="@+id/id_tv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="id" />
     </LinearLayout>
 </FrameLayout>

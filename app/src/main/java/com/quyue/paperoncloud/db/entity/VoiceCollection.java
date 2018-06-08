@@ -9,10 +9,15 @@ import java.util.Date;
  * Created by arter on 2018/6/8.
  */
 
-public class VoiceCollection extends DataSupport {
+public class VoiceCollection extends DataSupport implements BaseEntity {
     private int id;
-    private int VoiceResourceId;
+    private VoiceResource voiceResource;
     private Date addTime;
+
+    @Override
+    public String getName() {
+        return voiceResource.getName();
+    }
 
     public int getId() {
         return id;
@@ -22,13 +27,6 @@ public class VoiceCollection extends DataSupport {
         this.id = id;
     }
 
-    public int getVoiceResourceId() {
-        return VoiceResourceId;
-    }
-
-    public void setVoiceResourceId(int voiceResourceId) {
-        VoiceResourceId = voiceResourceId;
-    }
 
     public Date getAddTime() {
         return addTime;
@@ -36,5 +34,23 @@ public class VoiceCollection extends DataSupport {
 
     public void setAddTime(Date addTime) {
         this.addTime = addTime;
+    }
+
+    public VoiceResource getVoiceResource() {
+        return voiceResource;
+    }
+
+    public void setVoiceResource(VoiceResource voiceResource) {
+        this.voiceResource = voiceResource;
+    }
+
+    @Override
+    public String toString() {
+
+        return "VoiceCollection{" +
+                "id=" + id +
+                ", " + voiceResource.toString() +
+                ", addTime=" + addTime +
+                '}';
     }
 }

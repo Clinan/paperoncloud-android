@@ -18,17 +18,22 @@
             android:layout_weight="7"
             android:gravity="left|center_vertical"
             android:paddingLeft="150px"
-            android:typeface="sans"
             android:textColor="@color/blue_one"
-            android:textSize="72px" />
+            android:textSize="72px"
+            android:typeface="sans" />
 
         <ImageView
             android:layout_width="100px"
             android:layout_height="74px"
-            android:adjustViewBounds="true"
             android:layout_marginRight="100px"
+            android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:src="@drawable/play_right" />
 
+        <TextView
+            android:id="@+id/id_tv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="id" />
     </LinearLayout>
 </FrameLayout>

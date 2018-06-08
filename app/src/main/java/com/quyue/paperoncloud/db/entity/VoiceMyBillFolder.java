@@ -11,13 +11,18 @@ import java.util.List;
  * Created by arter on 2018/6/8.
  */
 
-public class VoiceMyBillFolder extends DataSupport {
+public class VoiceMyBillFolder extends DataSupport implements BaseEntity{
     private int id;
     private String folderName;
     private Date addTime;
 
     //和VoiceMyBill是一对多关系
     private List<VoiceMyBill> voiceMyBillList = new ArrayList<>();
+
+    @Override
+    public String getName() {
+        return folderName;
+    }
 
     public int getId() {
         return id;
@@ -49,5 +54,19 @@ public class VoiceMyBillFolder extends DataSupport {
 
     public void setVoiceMyBillList(List<VoiceMyBill> voiceMyBillList) {
         this.voiceMyBillList = voiceMyBillList;
+    }
+
+    @Override
+    public String toString() {
+        String voiceMyBillListStr = "";
+        for (VoiceMyBill v : voiceMyBillList) {
+            voiceMyBillListStr = voiceMyBillListStr + v.toString() + ",";
+        }
+        return "VoiceMyBillFolder{" +
+                "id=" + id +
+                ", folderName='" + folderName + '\'' +
+                ", addTime=" + addTime +
+                ", voiceMyBillList=" + voiceMyBillListStr +
+                '}';
     }
 }

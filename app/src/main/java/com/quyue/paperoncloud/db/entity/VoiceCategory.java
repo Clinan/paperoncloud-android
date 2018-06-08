@@ -9,7 +9,7 @@ import java.util.List;
  * Created by arter on 2018/6/8.
  */
 
-public class VoiceCategory extends DataSupport {
+public class VoiceCategory extends DataSupport implements BaseEntity {
     private int id;
     private String name;
     private List<VoiceResource> voiceResourceList = new ArrayList<>();

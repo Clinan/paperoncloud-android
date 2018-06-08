@@ -23,6 +23,8 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.quyue.paperoncloud.db.data.DataBaseConstants;
+
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -47,6 +49,9 @@ public class WelcomeActivity extends AppCompatActivity {
         handler.sendEmptyMessageDelayed(0, 6000);
         findById();
         animation();
+
+//        DataBaseConstants.dropTables();
+        DataBaseConstants.initDataBaseData();
 
     }
 

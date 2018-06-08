@@ -25,7 +25,7 @@
             android:src="@drawable/snow_white" />
 
         <TextView
-            android:id="@+id/miniStoryImageView"
+            android:id="@+id/miniStoryTitleTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -82,11 +82,11 @@
                     app:civ_border_width="3dp" />
 
                 <TextView
-                    android:id="@+id/albumStoryTitleImageView"
+                    android:id="@+id/albumStoryTitleTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30px"
-                    android:text="故事标题"
+                    android:textColor="@color/blue_one"
                     android:textSize="52px" />
 
                 <LinearLayout
@@ -121,32 +121,31 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/lyricsStoryTitleImageView"
+                    android:id="@+id/lyricsStoryTitleTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="故事标题"
                     android:textColor="@color/blue_one"
                     android:textSize="72px" />
 
                 <TextView
-                    android:id="@+id/authorImageView"
+                    android:id="@+id/authorTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3px"
-                    android:text="作者"
                     android:textColor="@color/blue_one"
                     android:textSize="52px" />
 
+                <ScrollView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
                 <TextView
-                    android:id="@+id/lyrics_TextView"
+                    android:id="@+id/lyricsTextView"
                     android:layout_width="720px"
                     android:layout_height="720px"
                     android:layout_marginTop="30px"
-
-                    android:text="歌词内容：xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                    android:textColor="@color/blue_one"
+                     android:textColor="@color/blue_one"
                     android:textSize="52px" />
-
+            </ScrollView>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50px"

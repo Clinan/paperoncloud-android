@@ -1,0 +1,34 @@
+天气
+佚名
+今天是晴天 It's a sunny day
+sunny day 晴天
+今天是阴天 It's a cloudy day
+cloudy day 阴天
+今天天真热 It's a hot day
+hot day 天真热
+今天天真冷 It's a cold day
+cold day  天真冷
+今天下雨天 It's a rainy day
+rainy day 下雨天
+今天下雪天 It's a snowy day
+snowy day 下雪天
+今天大风天 It's a windy day
+windy day 大风天
+今天大雾天 It's a foggy day
+foggy day 大雾天 
+今天是晴天 It's a sunny day
+sunny day 晴天
+今天是阴天 It's a cloudy day
+cloudy day 阴天
+今天天真热 It's a hot day
+hot day 天真热
+今天天真冷 It's a cold day
+cold day  天真冷
+今天下雨天 It's a rainy day
+rainy day 下雨天
+今天下雪天 It's a snowy day
+snowy day 下雪天
+今天大风天 It's a windy day
+windy day 大风天
+今天大雾天 It's a foggy day
+foggy day 大雾天 

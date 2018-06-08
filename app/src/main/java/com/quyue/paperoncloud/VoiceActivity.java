@@ -5,9 +5,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.speech.tts.Voice;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -21,6 +24,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +41,14 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.quyue.paperoncloud.adapter.RecyclerViewAdapter;
+import com.quyue.paperoncloud.adapter.RecyclerViewClickSupport;
+import com.quyue.paperoncloud.db.data.DataBaseConstants;
+import com.quyue.paperoncloud.db.entity.VoiceCategory;
+import com.quyue.paperoncloud.db.entity.VoiceResource;
 import com.quyue.paperoncloud.fragment.TabContentFragment;
+import com.quyue.paperoncloud.util.LyricsFileUtil;
+import com.quyue.paperoncloud.util.Util;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -49,11 +60,11 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
     private TabLayout mTabTl;
     private ViewPager mContentVp;
     private SlidingUpPanelLayout mLayout;
-    private List<String> tabIndicators;
     private List<Fragment> tabFragments;
     private ContentPagerAdapter contentAdapter;
 
     private CircleImageView albumImageView;
+    private ImageView miniAlbumImageView;
     private LinearLayout albumLayout;
     private LinearLayout lyricsLayout;
     private ImageView playImageView;
@@ -63,6 +74,13 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
     private SeekBar voiceTimeSeekBar;
     private TextView currentTimeTextView;
     private TextView endTimeTextView;
+    private TextView miniStoryTitleTextView;
+    private TextView albumStoryTitleTextView;
+    private TextView lyricsStoryTitleTextView;
+    private TextView authorTextView;
+    private TextView lyricsTextView;
+
+
     private Animation albumImageViewAnimation;
 
     private Intent voiceServiceIntent;
@@ -161,9 +179,14 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
     private void initControlItem() {
         albumImageView = findViewById(R.id.Album_ImageView);
-
+        miniAlbumImageView = findViewById(R.id.miniAlbumImageView);
         albumLayout = findViewById(R.id.albumLayout);
         lyricsLayout = findViewById(R.id.lyricsLayout);
+        miniStoryTitleTextView = findViewById(R.id.miniStoryTitleTextView);
+        albumStoryTitleTextView = findViewById(R.id.albumStoryTitleTextView);
+        lyricsStoryTitleTextView = findViewById(R.id.lyricsStoryTitleTextView);
+        authorTextView = findViewById(R.id.authorTextView);
+        lyricsTextView = findViewById(R.id.lyricsTextView);
 
         playImageView = findViewById(R.id.playImageView);
         stopImageView = findViewById(R.id.stopImageView);
@@ -263,7 +286,6 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                Log.i(TAG, "onPanelSlide, offset " + slideOffset);
                 if (miniLayout.getVisibility() == View.INVISIBLE) {
                     miniLayout.setVisibility(View.VISIBLE);
                 }
@@ -272,7 +294,6 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-                Log.i(TAG, "onPanelStateChanged " + newState);
                 if (newState.equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
                     miniLayout.setVisibility(View.INVISIBLE);
                 }
@@ -290,141 +311,74 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
+    /**
+     * 初始化RecyclerView容器
+     */
     private void initContent() {
-        tabIndicators = new ArrayList<>();
-        String[] tabs = {"全部", "童话", "科教", "自然", "安全"};
-        tabIndicators.addAll(Arrays.asList(tabs));
-
-        tabFragments = new ArrayList<>();
-        for (int i = 0; i < tabIndicators.size(); i++) {
-            TabContentFragment tmp = TabContentFragment.newInstance(tabs[i]);
-            switch (i) {
-                // 全部界面
-                case 0: {
-                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
-                    tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
-                        @Override
-                        public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-                            View view = inflater.inflate(R.layout.fragment_tab_story, null);
-                            LinearLayout linearLayout = view.findViewById(R.id.linearLayout_fragment_tab_story);
-
-//                            for (int i = 0; i < storyList.length; i++) {
-//                                addTextViewToParentView(linearLayout, 60, storyList[i]);
-//                            }
-                            RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
-                                    LinearLayoutManager.VERTICAL, false);//这里我们使用默认的线性布局管理器,将其设为垂直显示
-                            recyclerView.setLayoutManager(layoutManager);//设置布局管理器
-                            List<String> list = new ArrayList<String>();
-                            list.addAll(Arrays.asList(storyList));
-                            RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), list, R.layout.recyclerviewadaptervoice_play_bill_item);//实例化适配器
-                            recyclerView.setAdapter(adapter);//设置适配器
-                            return view;
-                        }
-                    });
-                }
-                break;
-                // 童话界面
-                case 1: {
-                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
-                    tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
-                        @Override
-                        public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-                            View view = inflater.inflate(R.layout.fragment_tab_story, null);
-                            LinearLayout linearLayout = view.findViewById(R.id.linearLayout_fragment_tab_story);
-
-                            RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
-                                    LinearLayoutManager.VERTICAL, false);//这里我们使用默认的线性布局管理器,将其设为垂直显示
-                            recyclerView.setLayoutManager(layoutManager);//设置布局管理器
-                            List<String> list = new ArrayList<String>();
-                            list.addAll(Arrays.asList(storyList));
-                            RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), list, R.layout.recyclerviewadaptervoice_play_bill_item);//实例化适配器
-                            recyclerView.setAdapter(adapter);//设置适配器
-                            return view;
-                        }
-                    });
-                }
-
-                break;
-                // 科教界面
-                case 2: {
-                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
-                    tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
-                        @Override
-                        public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-                            View view = inflater.inflate(R.layout.fragment_tab_story, null);
-                            LinearLayout linearLayout = view.findViewById(R.id.linearLayout_fragment_tab_story);
-
-//                            for (int i = 0; i < storyList.length; i++) {
-//                                addTextViewToParentView(linearLayout, 60, storyList[i]);
-//                            }
-                            RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
-                                    LinearLayoutManager.VERTICAL, false);//这里我们使用默认的线性布局管理器,将其设为垂直显示
-                            recyclerView.setLayoutManager(layoutManager);//设置布局管理器
-                            List<String> list = new ArrayList<String>();
-                            list.addAll(Arrays.asList(storyList));
-                            RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), list, R.layout.recyclerviewadaptervoice_play_bill_item);//实例化适配器
-                            recyclerView.setAdapter(adapter);//设置适配器
-                            return view;
-                        }
-                    });
-                }
-                break;
-                // 自然界面
-                case 3: {
-                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
-                    tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
-                        @Override
-                        public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-                            View view = inflater.inflate(R.layout.fragment_tab_story, null);
-                            LinearLayout linearLayout = view.findViewById(R.id.linearLayout_fragment_tab_story);
-
-//                            for (int i = 0; i < storyList.length; i++) {
-//                                addTextViewToParentView(linearLayout, 60, storyList[i]);
-//                            }
-                            RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
-                                    LinearLayoutManager.VERTICAL, false);//这里我们使用默认的线性布局管理器,将其设为垂直显示
-                            recyclerView.setLayoutManager(layoutManager);//设置布局管理器
-                            List<String> list = new ArrayList<String>();
-                            list.addAll(Arrays.asList(storyList));
-                            RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), list, R.layout.recyclerviewadaptervoice_play_bill_item);//实例化适配器
-                            recyclerView.setAdapter(adapter);//设置适配器
-                            return view;
-                        }
-                    });
-                }
-                break;
-                // 安全界面
-                case 4: {
-                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
-                    tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
-                        @Override
-                        public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-                            View view = inflater.inflate(R.layout.fragment_tab_story, null);
-                            LinearLayout linearLayout = view.findViewById(R.id.linearLayout_fragment_tab_story);
-
-//                            for (int i = 0; i < storyList.length; i++) {
-//                                addTextViewToParentView(linearLayout, 60, storyList[i]);
-//                            }
-                            RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
-                                    LinearLayoutManager.VERTICAL, false);//这里我们使用默认的线性布局管理器,将其设为垂直显示
-                            recyclerView.setLayoutManager(layoutManager);//设置布局管理器
-                            List<String> list = new ArrayList<String>();
-                            list.addAll(Arrays.asList(storyList));
-                            RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), list, R.layout.recyclerviewadaptervoice_play_bill_item);//实例化适配器
-                            recyclerView.setAdapter(adapter);//设置适配器
-                            return view;
-                        }
-                    });
-                }
-                break;
-
+        final List<VoiceCategory> categoryList = DataBaseConstants.voiceCategoryList;
+        final RecyclerViewAdapter.OnRecyclerViewItemClickListener onRecyclerViewItemClickListener = new RecyclerViewAdapter.OnRecyclerViewItemClickListener() {
+            @Override
+            public void onItemClick(View view) {
+                TextView idTextView = view.findViewById(R.id.id_tv);
+                Log.d(TAG, idTextView.getText().toString());
+                int id = Integer.valueOf(idTextView.getText().toString().trim());
+                VoiceResource voiceResource = (VoiceResource) Util.getEntityFromList(DataBaseConstants.voiceResourceList, id);
+                setNewVoice(voiceResource);
             }
 
+            @Override
+            public boolean onItemLongClick(View view) {
+                return false;
+            }
+        };
+        tabFragments = new ArrayList<>();
+        for (int i = 0; i < categoryList.size()+1; i++) {
+            TabContentFragment tmp;
+            if (i == 0) {
+                tmp = TabContentFragment.newInstance("全部");
+                tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
+                    @Override
+                    public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+                        View view = inflater.inflate(R.layout.fragment_tab_story, null);
+                        RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
+                        //使用默认的线性布局管理器,将其设为垂直显示
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
+                                LinearLayoutManager.VERTICAL, false);
+                        //设置布局管理器
+                        recyclerView.setLayoutManager(layoutManager);
+                        //实例化适配器
+                        RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), DataBaseConstants.voiceResourceList, R.layout.recyclerviewadaptervoice_play_bill_item, true);
+                        //设置适配器
+                        recyclerView.setAdapter(adapter);
+                        //设置item点击回调事件
+                        adapter.setOnRecyclerViewItemClickListener(onRecyclerViewItemClickListener);
+                        return view;
+                    }
+                });
+            } else {
+                tmp = TabContentFragment.newInstance(categoryList.get(i - 1).getName());
+                final int index = i - 1;
+                tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
+                    @Override
+                    public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+                        View view = inflater.inflate(R.layout.fragment_tab_story, null);
+
+                        RecyclerView recyclerView = view.findViewById(R.id.voice_recyclerView_in_fragment);
+                        //使用默认的线性布局管理器,将其设为垂直显示
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
+                                LinearLayoutManager.VERTICAL, false);
+                        //设置布局管理器
+                        recyclerView.setLayoutManager(layoutManager);
+                        // 实例化适配器
+                        RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), categoryList.get(index).getVoiceResourceList(), R.layout.recyclerviewadaptervoice_play_bill_item, true);
+                        //设置适配器
+                        recyclerView.setAdapter(adapter);
+                        //设置item点击回调事件
+                        adapter.setOnRecyclerViewItemClickListener(onRecyclerViewItemClickListener);
+                        return view;
+                    }
+                });
+            }
 
             tabFragments.add(tmp);
         }
@@ -452,12 +406,16 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         public int getCount() {
-            return tabIndicators.size();
+            return DataBaseConstants.voiceCategoryList.size() + 1;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return tabIndicators.get(position);
+            if (position == 0) {
+                return "全部";
+            } else {
+                return DataBaseConstants.voiceCategoryList.get(position - 1).getName();
+            }
         }
     }
 
@@ -525,6 +483,38 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         } else {
 //            albumImageViewAnimation.get
             albumImageView.clearAnimation();
+        }
+    }
+
+    public void setNewVoice(final VoiceResource voice) {
+        if (voice != null) {
+            voiceService.setVoiceResource(voice.getResId());
+            //ui更新
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //album专辑图片更新
+                    albumImageView.setImageDrawable(getResources().getDrawable(voice.getAlbumResId()));
+                    miniAlbumImageView.setImageDrawable(getResources().getDrawable(voice.getAlbumResId()));
+                    // 按钮更新
+                    playImageView.setVisibility(View.GONE);
+                    stopImageView.setVisibility(View.VISIBLE);
+                    miniPlayImageView.setVisibility(View.GONE);
+                    miniStopImageView.setVisibility(View.VISIBLE);
+
+                    //文本更新
+                    miniStoryTitleTextView.setText(voice.getName());
+                    albumStoryTitleTextView.setText(voice.getName());
+                    lyricsStoryTitleTextView.setText(voice.getName());
+                    authorTextView.setText(voice.getAuthor());
+                    try {
+                        String lyricsText = LyricsFileUtil.getResTxtFileString(getApplicationContext(), voice.getLyricsResId());
+                        lyricsTextView.setText(lyricsText);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 
