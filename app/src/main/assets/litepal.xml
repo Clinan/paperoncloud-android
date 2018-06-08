@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="paperoncloud"/>
+
+    <version value="2"/>
+
+    <list>
+        <mapping class="com.quyue.paperoncloud.db.entity.VoiceResource"/>
+        <mapping class="com.quyue.paperoncloud.db.entity.VoiceHistory"/>
+        <mapping class="com.quyue.paperoncloud.db.entity.VoiceCollection"/>
+        <mapping class="com.quyue.paperoncloud.db.entity.VoiceMyBill"/>
+        <mapping class="com.quyue.paperoncloud.db.entity.VoiceMyBillFolder"/>
+        <mapping class="com.quyue.paperoncloud.db.entity.VoiceCategory"/>
+    </list>
+</litepal>

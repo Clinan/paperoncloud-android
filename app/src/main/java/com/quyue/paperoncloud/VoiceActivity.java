@@ -1,8 +1,13 @@
 package com.quyue.paperoncloud;
 
-import android.graphics.Color;
-import android.media.Image;
+import android.animation.ObjectAnimator;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -14,27 +19,25 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 import com.quyue.paperoncloud.fragment.TabContentFragment;
-import com.quyue.paperoncloud.R;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -57,6 +60,75 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
     private ImageView stopImageView;
     private ImageView miniPlayImageView;
     private ImageView miniStopImageView;
+    private SeekBar voiceTimeSeekBar;
+    private TextView currentTimeTextView;
+    private TextView endTimeTextView;
+    private Animation albumImageViewAnimation;
+
+    private Intent voiceServiceIntent;
+    private VoiceService voiceService;
+    private boolean isConnectService = false;
+    private ServiceConnection conn = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // TODO Auto-generated method stub
+            voiceService = null;
+            isConnectService = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            // 实例化audioService,通过binder来实现
+            voiceService = ((VoiceService.AudioBinder) binder).getService();
+            isConnectService = true;
+        }
+    };
+
+    private SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+
+    private Handler handler = new Handler();
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+
+            if (voiceService != null) {
+
+//                Log.d(TAG, "设置了开始时间和结束时间");
+                voiceTimeSeekBar.setProgress(voiceService.getPlayer().getCurrentPosition());
+                voiceTimeSeekBar.setMax(voiceService.getPlayer().getDuration());
+                currentTimeTextView.setText(timeFormat(voiceService.getPlayer().getCurrentPosition()));
+                endTimeTextView.setText(timeFormat(voiceService.getPlayer().getDuration()));
+
+                // 当歌曲结束时，清除动画，切换按钮
+                if (!voiceService.getPlayer().isPlaying()) {
+                    albumImageView.clearAnimation();
+                    playImageView.setVisibility(View.VISIBLE);
+                    stopImageView.setVisibility(View.GONE);
+                    miniPlayImageView.setVisibility(View.VISIBLE);
+                    miniStopImageView.setVisibility(View.GONE);
+                }
+            }
+            handler.postDelayed(runnable, 1000);
+        }
+    };
+
+    private String timeFormat(int milliSeconds) {
+        String result = "";
+        int totalSeconds = milliSeconds / 1000;
+        int min = totalSeconds / 60;
+        int second = totalSeconds % 60;
+        String minStr = String.valueOf(min);
+        String secondStr = String.valueOf(second);
+        if (minStr.length() < 2) {
+            minStr = "0" + minStr;
+        }
+        if (secondStr.length() < 2) {
+            secondStr = "0" + secondStr;
+        }
+        result = minStr + ":" + secondStr;
+        return result;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,7 +143,21 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
         initControlItem();
         exchangeAlbumAndLyrics();
+
+        Intent voiceServiceInten = new Intent();
+        voiceServiceInten.setClass(this, VoiceService.class);
+        //启动Service
+        startService(voiceServiceInten);
+        if (!isConnectService) {
+            bindService(voiceServiceInten, conn, Context.BIND_AUTO_CREATE);
+        }
+
     }
+
+
+    /**
+     * 初始化界面图片，按钮等控件
+     */
 
     private void initControlItem() {
         albumImageView = findViewById(R.id.Album_ImageView);
@@ -83,13 +169,66 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         stopImageView = findViewById(R.id.stopImageView);
         miniPlayImageView = findViewById(R.id.miniPlayImageView);
         miniStopImageView = findViewById(R.id.miniStopImageView);
-
+        voiceTimeSeekBar = findViewById(R.id.play_time_seek_bar);
+        currentTimeTextView = findViewById(R.id.current_time_tv);
+        endTimeTextView = findViewById(R.id.end_time_tv);
 
         playImageView.setOnClickListener(this);
         stopImageView.setOnClickListener(this);
         miniPlayImageView.setOnClickListener(this);
         miniStopImageView.setOnClickListener(this);
 
+        albumImageViewAnimation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        albumImageViewAnimation.setFillAfter(true); // 设置保持动画最后的状态
+        albumImageViewAnimation.setDuration(5000); // 设置动画时间
+        albumImageViewAnimation.setRepeatCount(ObjectAnimator.INFINITE);
+        albumImageViewAnimation.setInterpolator(new LinearInterpolator()); // 设置线性插入器
+        albumImageViewAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+//                albumImageViewAnimation
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        voiceTimeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    voiceService.getPlayer().seekTo(seekBar.getProgress());
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+
+        if (voiceService != null) {
+            voiceTimeSeekBar.setProgress(voiceService.getPlayer().getCurrentPosition());
+            voiceTimeSeekBar.setMax(voiceService.getPlayer().getDuration());
+        }
+        handler.post(runnable);
+        super.onResume();
     }
 
     private void exchangeAlbumAndLyrics() {
@@ -162,7 +301,7 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
             switch (i) {
                 // 全部界面
                 case 0: {
-                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
+                    final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
                     tmp.setOnLoadViewListener(new TabContentFragment.OnLoadViewListener() {
                         @Override
                         public View onLoadView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -299,23 +438,6 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         super.onBackPressed();
     }
 
-    public void addTextViewToParentView(ViewGroup parentView, int marginTop, String text) {
-        TextView textView = new TextView(getApplicationContext());
-        textView.setWidth(681);
-        textView.setHeight(150);
-        textView.setPadding(180, 0, 0, 0);
-        textView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-        textView.setTextColor(Color.BLACK);
-        textView.setBackground(getDrawable(R.drawable.voice_item_bg));
-
-        // 设置margin参数
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(681, 150);
-        lp.setMargins(0, marginTop, 0, 0);
-        textView.setLayoutParams(lp);
-        textView.setText(text);
-        parentView.addView(textView);
-    }
-
 
     class ContentPagerAdapter extends FragmentPagerAdapter {
 
@@ -358,20 +480,52 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
             case R.id.playImageView:
                 playImageView.setVisibility(View.GONE);
                 stopImageView.setVisibility(View.VISIBLE);
+                miniPlayImageView.setVisibility(View.GONE);
+                miniStopImageView.setVisibility(View.VISIBLE);
+                playOrPause();
                 break;
             case R.id.stopImageView:
-
                 playImageView.setVisibility(View.VISIBLE);
                 stopImageView.setVisibility(View.GONE);
+                miniPlayImageView.setVisibility(View.VISIBLE);
+                miniStopImageView.setVisibility(View.GONE);
+                playOrPause();
                 break;
             case R.id.miniPlayImageView:
                 miniPlayImageView.setVisibility(View.GONE);
                 miniStopImageView.setVisibility(View.VISIBLE);
+                playImageView.setVisibility(View.GONE);
+                stopImageView.setVisibility(View.VISIBLE);
+                playOrPause();
                 break;
             case R.id.miniStopImageView:
                 miniPlayImageView.setVisibility(View.VISIBLE);
                 miniStopImageView.setVisibility(View.GONE);
+                playImageView.setVisibility(View.VISIBLE);
+                stopImageView.setVisibility(View.GONE);
+                playOrPause();
                 break;
         }
     }
+
+    public void playOrPause() {
+        if (!isConnectService) {
+            Log.d(TAG, "bindService");
+            bindService(voiceServiceIntent, conn, Context.BIND_AUTO_CREATE);
+        }
+        voiceService.playOrPause();
+
+        voiceTimeSeekBar.setProgress(voiceService.getPlayer().getCurrentPosition());
+        voiceTimeSeekBar.setMax(voiceService.getPlayer().getDuration());
+        handler.post(runnable);
+
+        // 专辑图片动画旋转判断
+        if (voiceService.getPlayer().isPlaying()) {
+            albumImageView.startAnimation(albumImageViewAnimation);
+        } else {
+//            albumImageViewAnimation.get
+            albumImageView.clearAnimation();
+        }
+    }
+
 }

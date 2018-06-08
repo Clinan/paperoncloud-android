@@ -33,4 +33,6 @@ dependencies {
     }
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.sothree.slidinguppanel:library:3.4.0'
+    compile 'org.litepal.android:core:1.6.1'
+
 }

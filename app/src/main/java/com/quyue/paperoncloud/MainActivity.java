@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         animator.setRepeatMode(ValueAnimator.REVERSE);
         animator.start();
 
+
+
     }
 
     // 个人中心跳转
