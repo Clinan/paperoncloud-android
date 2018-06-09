@@ -26,6 +26,8 @@ import java.util.List;
  * <p>
  * 包含一些用于数据库数据初始化的方法。如果首次使用应用，会在欢迎界面初始化该数据库，并将数据导入到数据库
  * 注意：里面的方法都开启了一个线程进行操作，无需担心主线程堵塞问题
+ *
+ * 存放所有的数据库操作，数据库操作不在外面随便进行。统一由这个类管理。
  * Created by clan on 2018/6/8.
  */
 
@@ -373,8 +375,8 @@ public class DataBaseConstants {
         if (voiceResource == null) {
             return false;
         } else {
-            for (VoiceHistory v:voiceHistoryList) {
-                if (v.getVoiceResource().getId()==voiceResource.getId()){
+            for (VoiceHistory v : voiceHistoryList) {
+                if (v.getVoiceResource().getId() == voiceResource.getId()) {
                     return false;
                 }
             }
@@ -394,12 +396,12 @@ public class DataBaseConstants {
     }
 
 
-    public static boolean insertOrDel2VoiceMyCollection(VoiceResource voiceResource){
+    public static boolean insertOrDel2VoiceMyCollection(VoiceResource voiceResource) {
         if (voiceResource == null) {
             return false;
         } else {
-            for (VoiceCollection v:voiceCollectionList) {
-                if (v.getVoiceResource().getId()==voiceResource.getId()){
+            for (VoiceCollection v : voiceCollectionList) {
+                if (v.getVoiceResource().getId() == voiceResource.getId()) {
                     v.setVoiceResource(null);
                     v.update(v.getId());
                     selectAllTableData();
@@ -413,11 +415,16 @@ public class DataBaseConstants {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-            voiceCollection.save();
-            selectAllTableData();
-        }
+                    voiceCollection.save();
+                    selectAllTableData();
+                }
             }).start();
             return true;
         }
     }
+
+    public static List<VoiceMyBill> getVoiceRourceByVoiceMyBillListIds(long[] ids) {
+        return DataSupport.findAll(VoiceMyBill.class, true, ids);
+    }
+
 }

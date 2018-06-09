@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">paperoncloud</string>
+    <string name="app_name">Read AR</string>
     <string name="title_activity_voice">VoiceActivity</string>
     <string name="title_activity_history">HistoryActivity</string>
 </resources>

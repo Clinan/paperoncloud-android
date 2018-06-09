@@ -559,13 +559,12 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(getApplicationContext(), NO_VOICE_IN_PLAYER_TOAST, Toast.LENGTH_SHORT).show();
                 } else {
                     boolean isExist=DataBaseConstants.insertOrDel2VoiceMyCollection(currentPlayVoiceResource);;
-                        collectionImageView.setImageDrawable(getDrawable(R.drawable.collect_icon));
-
                     if (isExist){
-
+                        collectionImageView.setImageDrawable(getDrawable(R.drawable.collect_icon));
                     }else {
-
                         collectionImageView.setImageDrawable(getDrawable(R.drawable.ic_cc_heart));
+                        Toast.makeText(getApplicationContext(), "收藏成功", Toast.LENGTH_SHORT).show();
+
                     }
                 }
                 break;
