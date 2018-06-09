@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +24,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 
 import java.io.IOException;
@@ -29,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -36,15 +40,20 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.quyue.paperoncloud.adapter.RecyclerViewAdapter;
 import com.quyue.paperoncloud.adapter.RecyclerViewClickSupport;
 import com.quyue.paperoncloud.db.data.DataBaseConstants;
 import com.quyue.paperoncloud.db.entity.VoiceCategory;
+import com.quyue.paperoncloud.db.entity.VoiceCollection;
 import com.quyue.paperoncloud.db.entity.VoiceResource;
 import com.quyue.paperoncloud.fragment.TabContentFragment;
 import com.quyue.paperoncloud.util.LyricsFileUtil;
@@ -57,6 +66,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class VoiceActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "VoiceActivity";
+    private static final String NO_VOICE_IN_PLAYER_TOAST = "当前无播放歌曲";
+    public static final String VOICE_ACTIVITY_INTENT_ACTION = "com.quyue.paperoncloud.playvoice";
+    public static final String VOICE_ACTIVITY_INTENT_Extras_OBJ_NAME = "voiceResourceObj";
     private TabLayout mTabTl;
     private ViewPager mContentVp;
     private SlidingUpPanelLayout mLayout;
@@ -80,12 +92,17 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
     private TextView authorTextView;
     private TextView lyricsTextView;
 
+    private ImageView addBillImageView;
+    private ImageView collectionImageView;
+    private ImageView shareImageView;
+    private ImageView downloadImageView;
 
     private Animation albumImageViewAnimation;
 
     private Intent voiceServiceIntent;
     private VoiceService voiceService;
     private boolean isConnectService = false;
+    private VoiceResource currentPlayVoiceResource;
     private ServiceConnection conn = new ServiceConnection() {
 
         @Override
@@ -100,6 +117,9 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
             // 实例化audioService,通过binder来实现
             voiceService = ((VoiceService.AudioBinder) binder).getService();
             isConnectService = true;
+            if (currentPlayVoiceResource != null) {
+                setNewVoice(currentPlayVoiceResource);
+            }
         }
     };
 
@@ -162,12 +182,12 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         initControlItem();
         exchangeAlbumAndLyrics();
 
-        Intent voiceServiceInten = new Intent();
-        voiceServiceInten.setClass(this, VoiceService.class);
+        voiceServiceIntent = new Intent();
+        voiceServiceIntent.setClass(this, VoiceService.class);
         //启动Service
-        startService(voiceServiceInten);
+        startService(voiceServiceIntent);
         if (!isConnectService) {
-            bindService(voiceServiceInten, conn, Context.BIND_AUTO_CREATE);
+            bindService(voiceServiceIntent, conn, Context.BIND_AUTO_CREATE);
         }
 
     }
@@ -188,6 +208,11 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         authorTextView = findViewById(R.id.authorTextView);
         lyricsTextView = findViewById(R.id.lyricsTextView);
 
+        addBillImageView = findViewById(R.id.addBillImageView);
+        collectionImageView = findViewById(R.id.collectionImageView);
+        shareImageView = findViewById(R.id.shareImageView);
+        downloadImageView = findViewById(R.id.downloadImageView);
+
         playImageView = findViewById(R.id.playImageView);
         stopImageView = findViewById(R.id.stopImageView);
         miniPlayImageView = findViewById(R.id.miniPlayImageView);
@@ -200,29 +225,16 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
         stopImageView.setOnClickListener(this);
         miniPlayImageView.setOnClickListener(this);
         miniStopImageView.setOnClickListener(this);
+        addBillImageView.setOnClickListener(this);
+        collectionImageView.setOnClickListener(this);
+        shareImageView.setOnClickListener(this);
+        downloadImageView.setOnClickListener(this);
 
         albumImageViewAnimation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         albumImageViewAnimation.setFillAfter(true); // 设置保持动画最后的状态
         albumImageViewAnimation.setDuration(5000); // 设置动画时间
         albumImageViewAnimation.setRepeatCount(ObjectAnimator.INFINITE);
         albumImageViewAnimation.setInterpolator(new LinearInterpolator()); // 设置线性插入器
-        albumImageViewAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-//                albumImageViewAnimation
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
         voiceTimeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -245,6 +257,10 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     protected void onResume() {
+        VoiceResource voiceResource = (VoiceResource) getIntent().getSerializableExtra(VOICE_ACTIVITY_INTENT_Extras_OBJ_NAME);
+        if (voiceResource != null) {
+            currentPlayVoiceResource = voiceResource;
+        }
 
         if (voiceService != null) {
             voiceTimeSeekBar.setProgress(voiceService.getPlayer().getCurrentPosition());
@@ -320,7 +336,6 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onItemClick(View view) {
                 TextView idTextView = view.findViewById(R.id.id_tv);
-                Log.d(TAG, idTextView.getText().toString());
                 int id = Integer.valueOf(idTextView.getText().toString().trim());
                 VoiceResource voiceResource = (VoiceResource) Util.getEntityFromList(DataBaseConstants.voiceResourceList, id);
                 setNewVoice(voiceResource);
@@ -332,7 +347,7 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
             }
         };
         tabFragments = new ArrayList<>();
-        for (int i = 0; i < categoryList.size()+1; i++) {
+        for (int i = 0; i < categoryList.size() + 1; i++) {
             TabContentFragment tmp;
             if (i == 0) {
                 tmp = TabContentFragment.newInstance("全部");
@@ -463,10 +478,119 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
                 stopImageView.setVisibility(View.GONE);
                 playOrPause();
                 break;
+
+            /* 最下面的四个按钮*/
+            case R.id.addBillImageView:
+                if (currentPlayVoiceResource == null) {
+                    Toast.makeText(getApplicationContext(), NO_VOICE_IN_PLAYER_TOAST, Toast.LENGTH_SHORT).show();
+                } else {
+                    final PopupWindow voiceBillFolderPopup = new PopupWindow(getApplicationContext());
+                    View voiceBillFolderPopupView = View.inflate(getApplicationContext(), R.layout.voice_bill_folder_popup_layout, null);
+                    voiceBillFolderPopup.setContentView(voiceBillFolderPopupView);
+                    Button button = voiceBillFolderPopupView.findViewById(R.id.close_popup_button);
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            voiceBillFolderPopup.dismiss();
+                        }
+                    });
+                    {
+                        RecyclerView recyclerView = voiceBillFolderPopupView.findViewById(R.id.voice_bill_folder_popup_recyclerView);
+                        //使用默认的线性布局管理器,将其设为垂直显示
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(),
+                                LinearLayoutManager.VERTICAL, false);
+                        //设置布局管理器
+                        recyclerView.setLayoutManager(layoutManager);
+                        // 实例化适配器
+                        RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), DataBaseConstants.voiceMyBillFolderList, R.layout.recyclerviewadaptervoice_bill_item, true);
+                        //设置适配器
+                        recyclerView.setAdapter(adapter);
+                        //设置item点击回调事件
+                        adapter.setOnRecyclerViewItemClickListener(new RecyclerViewAdapter.OnRecyclerViewItemClickListener() {
+                            @Override
+                            public void onItemClick(View view) {
+                                //将歌曲添加到听单
+                                TextView idTextView = view.findViewById(R.id.id_tv);
+                                int id = Integer.valueOf(idTextView.getText().toString().trim());
+                                DataBaseConstants.insert2VoiceMyBill(id, currentPlayVoiceResource);
+                                //关闭voiceBillFolderPopup
+                                voiceBillFolderPopup.dismiss();
+                            }
+
+                            @Override
+                            public boolean onItemLongClick(View view) {
+                                return false;
+                            }
+                        });
+                    }
+                    //设置新增歌单选项
+                    final EditText new_bill_folder_et = voiceBillFolderPopupView.findViewById(R.id.new_bill_folder_et);
+                    new_bill_folder_et.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new_bill_folder_et.setCursorVisible(true);
+                        }
+                    });
+                    Button new_bill_folder_btn = voiceBillFolderPopupView.findViewById(R.id.new_bill_folder_btn);
+                    new_bill_folder_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String newFolderText = new_bill_folder_et.getText().toString().trim();
+                            if (newFolderText == null || newFolderText.equals("")) {
+                                Toast.makeText(getApplicationContext(), "听单名字不能为空", Toast.LENGTH_SHORT).show();
+                            } else {
+                                DataBaseConstants.insert2VoiceMyBillWithNewFolder(newFolderText, currentPlayVoiceResource);
+                                //关闭voiceBillFolderPopup
+                                voiceBillFolderPopup.dismiss();
+                            }
+                        }
+                    });
+
+                    voiceBillFolderPopup.setFocusable(true);
+                    voiceBillFolderPopup.setAnimationStyle(R.style.add_bill_popup_anim);
+                    voiceBillFolderPopup.setWidth(mLayout.getWidth());
+                    voiceBillFolderPopup.setHeight(1000);
+                    voiceBillFolderPopup.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.blue_two)));
+                    voiceBillFolderPopup.showAsDropDown(v, 0, -150, Gravity.BOTTOM);
+                }
+                break;
+            case R.id.collectionImageView:
+                if (currentPlayVoiceResource == null) {
+                    Toast.makeText(getApplicationContext(), NO_VOICE_IN_PLAYER_TOAST, Toast.LENGTH_SHORT).show();
+                } else {
+                    boolean isExist=DataBaseConstants.insertOrDel2VoiceMyCollection(currentPlayVoiceResource);;
+                        collectionImageView.setImageDrawable(getDrawable(R.drawable.collect_icon));
+
+                    if (isExist){
+
+                    }else {
+
+                        collectionImageView.setImageDrawable(getDrawable(R.drawable.ic_cc_heart));
+                    }
+                }
+                break;
+            case R.id.shareImageView:
+                if (currentPlayVoiceResource == null) {
+                    Toast.makeText(getApplicationContext(), NO_VOICE_IN_PLAYER_TOAST, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "分享受限", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.downloadImageView:
+                if (currentPlayVoiceResource == null) {
+                    Toast.makeText(getApplicationContext(), NO_VOICE_IN_PLAYER_TOAST, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "正在下载：" + currentPlayVoiceResource.getName(), Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
     }
 
     public void playOrPause() {
+        if (currentPlayVoiceResource==null){
+            Toast.makeText(getApplicationContext(),NO_VOICE_IN_PLAYER_TOAST,Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (!isConnectService) {
             Log.d(TAG, "bindService");
             bindService(voiceServiceIntent, conn, Context.BIND_AUTO_CREATE);
@@ -488,7 +612,13 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
 
     public void setNewVoice(final VoiceResource voice) {
         if (voice != null) {
+            currentPlayVoiceResource = voice;
+            if (!isConnectService) {
+                Log.d(TAG, "bindService");
+                bindService(voiceServiceIntent, conn, Context.BIND_AUTO_CREATE);
+            }
             voiceService.setVoiceResource(voice.getResId());
+            DataBaseConstants.insert2VoiceHistoryBill(voice);
             //ui更新
             runOnUiThread(new Runnable() {
                 @Override
@@ -513,9 +643,18 @@ public class VoiceActivity extends AppCompatActivity implements View.OnClickList
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    //判断是否为已经收藏好的
+                    for (VoiceCollection c:DataBaseConstants.voiceCollectionList){
+                        if(c.getVoiceResource().getId()==voice.getId()){
+                            collectionImageView.setImageDrawable(getDrawable(R.drawable.ic_cc_heart));
+                            break;
+                        }
+                    }
+
                 }
             });
         }
     }
+
 
 }

@@ -53,10 +53,12 @@ public class VoiceService extends Service implements MediaPlayer.OnCompletionLis
 
     public void onDestroy() {
         //super.onDestroy();
-        if (player.isPlaying()) {
-            player.stop();
+        if (player!=null){
+            if (player.isPlaying()) {
+                player.stop();
+            }
+            player.release();
         }
-        player.release();
     }
 
     //为了和Activity交互，定义一个Binder对象

@@ -22,4 +22,9 @@
         <item name="android:textSize">52px</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
+
+    <style name="add_bill_popup_anim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@animator/pop_enter_anim</item>
+        <item name="android:windowExitAnimation">@animator/pop_exit_anim</item>
+    </style>
 </resources>

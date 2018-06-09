@@ -14,7 +14,10 @@
         <activity android:name=".MainActivity"/>
         <activity android:name=".UserCenterActivity" />
         <activity android:name=".VoiceActivity" >
-
+            <intent-filter>
+                <action android:name="com.quyue.paperoncloud.playvoice" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity android:name=".MyStarActivity" />
         <activity android:name=".VoiceBillActivity" />

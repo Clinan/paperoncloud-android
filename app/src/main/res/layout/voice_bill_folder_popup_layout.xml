@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="1000px"
+        android:background="@drawable/user_center_other_bg"
+        android:orientation="vertical"><LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:alpha="0.7"
+        android:background="@drawable/alpha_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/new_bill_folder_et"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="7"
+            android:gravity="left|center_vertical"
+            android:paddingLeft="150px"
+            android:textColor="@color/blue_one"
+            android:cursorVisible="false"
+            android:textSize="72px"
+            android:text="新增听单"
+            android:typeface="sans" />
+        <Button
+            android:id="@+id/new_bill_folder_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/blue_one"
+            android:text="添加到新增的歌单"/>
+    </LinearLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/voice_bill_folder_popup_recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
+            android:scrollbars="vertical"/>
+        <Button
+            android:id="@+id/close_popup_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:background="@color/blue_two"
+            android:textColor="@color/blue_one"
+            android:text="取消" />
+    </RelativeLayout>
+
+
+</RelativeLayout>

@@ -48,7 +48,6 @@ public class VoiceMyBill extends DataSupport implements BaseEntity {
     public String toString() {
         return "VoiceMyBill{" +
                 "id=" + id +
-                ", VoiceResourceId=" + voiceResource.getName() +
                 ", addTime=" + addTime +
                 ", folderId=" + folderId +
                 '}';

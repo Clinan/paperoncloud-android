@@ -37,6 +37,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private ImageView logoImageView;
     private boolean jumpAnimationFlag = false;
+    private Thread dataBaseThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +52,7 @@ public class WelcomeActivity extends AppCompatActivity {
         animation();
 
 //        DataBaseConstants.dropTables();
-        DataBaseConstants.initDataBaseData();
+        dataBaseThread=DataBaseConstants.initDataBaseData();
 
     }
 
@@ -251,6 +252,11 @@ public class WelcomeActivity extends AppCompatActivity {
 
         @Override
         public void handleMessage(Message msg) {
+            try {
+                dataBaseThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             getHome();
             super.handleMessage(msg);
         }

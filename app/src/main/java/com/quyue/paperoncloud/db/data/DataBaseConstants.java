@@ -48,7 +48,7 @@ public class DataBaseConstants {
         voiceResourceList = DataSupport.findAll(VoiceResource.class, true);
         voiceCategoryList = DataSupport.findAll(VoiceCategory.class, true);
         voiceCollectionList = DataSupport.findAll(VoiceCollection.class, true);
-        voiceHistoryList = DataSupport.findAll(VoiceHistory.class, true);
+        voiceHistoryList = DataSupport.order("id desc").find(VoiceHistory.class, true);
         voiceMyBillList = DataSupport.findAll(VoiceMyBill.class, true);
         voiceMyBillFolderList = DataSupport.findAll(VoiceMyBillFolder.class, true);
 
@@ -59,15 +59,17 @@ public class DataBaseConstants {
         Log.d(TAG, listToString(voiceResourceList));
         Log.d(TAG, listToString(voiceCategoryList));
         Log.d(TAG, listToString(voiceCollectionList));
-        Log.d(TAG, listToString(voiceHistoryList));
-        Log.d(TAG, listToString(voiceMyBillList));
+//        Log.d(TAG, listToString(voiceHistoryList));
+//        Log.d(TAG, listToString(voiceMyBillList));
         Log.d(TAG, listToString(voiceMyBillFolderList));
     }
 
     private static String listToString(List<? extends BaseEntity> list) {
         String result = "";
         for (BaseEntity baseEntity : list) {
-            result = result + baseEntity.toString() + ",\n";
+            if (baseEntity != null) {
+                result = result + baseEntity.toString() + ",\n";
+            }
         }
         return result + "\n\n";
     }
@@ -75,21 +77,22 @@ public class DataBaseConstants {
     /**
      * 初始化数据库数据
      */
-    public static void initDataBaseData() {
-        new Thread(new Runnable() {
+    public static Thread initDataBaseData() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 //创建数据库
                 SQLiteDatabase db = Connector.getDatabase();
                 selectAllTableData();
-                printLists();
                 //初始化
                 initVoiceCategory();
                 initVoiceBillFolder();
                 selectAllTableData();
                 printLists();
             }
-        }).start();
+        });
+        thread.start();
+        return thread;
     }
 
     /**
@@ -214,12 +217,12 @@ public class DataBaseConstants {
                                 R.raw.e_lyc_zimuge,
                         };
                         int[] storyVoiceResList = {
-                                 R.raw.e_v_jiatingchengyuanchenghu,
-                                 R.raw.e_v_limaowenhouyu,
-                                 R.raw.e_v_shuzige,
-                                 R.raw.e_v_tianqi,
-                                 R.raw.e_v_yuefen,
-                                 R.raw.e_v_zimuge,
+                                R.raw.e_v_jiatingchengyuanchenghu,
+                                R.raw.e_v_limaowenhouyu,
+                                R.raw.e_v_shuzige,
+                                R.raw.e_v_tianqi,
+                                R.raw.e_v_yuefen,
+                                R.raw.e_v_zimuge,
                         };
                         category.setVoiceResourceList(initVoiceResource(storyList, storyauthorList, storyPicResList, storyVoiceResList, storyLycResList));
                         category.setName(tabs[i]);
@@ -236,11 +239,6 @@ public class DataBaseConstants {
      * 初始化声音资源
      */
     private static List<VoiceResource> initVoiceResource(String[] storyList, String[] storyauthorList, int[] storyPicResList, int[] storyVoiceResList, int[] storyLycResList) {
-//        final String[] storyList = {"白雪公主", "卖火柴的小女孩", "灰姑娘", "丑小鸭", "皇帝的新装", "拇指姑娘"};
-//        final String[] storyauthorList = {"安徒生", "安徒生", "安徒生", "安徒生", "安徒生", "安徒生"};
-//        final int[] storyPicResList = {R.raw.pic_snow_white, R.raw.pic_little_girl_selling_matches, R.raw.pic_cinderella, R.raw.pic_ugly_duckling, R.raw.pic_emperor_new_clothes, R.raw.pic_thumbelina};
-//        final int[] storyVoiceResList = {R.raw.v_snow_white, R.raw.v_little_girl_selling_matches, R.raw.v_cinderella, R.raw.v_ugly_duckling, R.raw.v_emperor_new_clothes, R.raw.v_thumbelina};
-//        final int[] storyLycResList = {R.raw.lyc_snow_white, R.raw.lyc_little_girl_selling_matches, R.raw.lyc_cinderella, R.raw.lyc_ugly_duckling, R.raw.lyc_emperor_new_clothes, R.raw.lyc_thumbelina};
 
         List<VoiceResource> list = new ArrayList<>();
 
@@ -282,6 +280,144 @@ public class DataBaseConstants {
             voiceMyBillFolder.setAddTime(new Date());
             voiceMyBillFolder.setId(0);
             voiceMyBillFolder.save();
+        }
+    }
+
+    /**
+     * 添加到新增听单中
+     *
+     * @param folderName
+     * @param voiceResource
+     * @return
+     */
+    public static boolean insert2VoiceMyBillWithNewFolder(String folderName, VoiceResource voiceResource) {
+
+        if (voiceResource == null) {
+            return false;
+        }
+        for (VoiceMyBillFolder folder : voiceMyBillFolderList) {
+            if (folder.getFolderName().equals(folderName)) {
+                return false;
+            }
+        }
+
+        //新增一个文件夹
+        final VoiceMyBillFolder voiceMyBillFolder = new VoiceMyBillFolder();
+        voiceMyBillFolder.setAddTime(new Date());
+        voiceMyBillFolder.setFolderName(folderName);
+
+        //新增一个听单记录
+        final VoiceMyBill voiceMyBill = new VoiceMyBill();
+        voiceMyBill.setAddTime(new Date());
+        voiceMyBill.setVoiceResource(voiceResource);
+        //将记录放入到List中，用于放入到文件夹中
+        List<VoiceMyBill> voiceMyBills = new ArrayList<>();
+        voiceMyBills.add(voiceMyBill);
+
+        voiceMyBillFolder.setVoiceMyBillList(voiceMyBills);
+        //开一个线程做数据库IO
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                voiceMyBill.save();
+                voiceMyBillFolder.save();
+                selectAllTableData();
+            }
+        }).start();
+        return true;
+    }
+
+    /**
+     * 添加到一个听单中
+     *
+     * @param folderId
+     * @param voiceResource
+     * @return
+     */
+    public static boolean insert2VoiceMyBill(int folderId, VoiceResource voiceResource) {
+        VoiceMyBillFolder voiceMyBillFolder = null;
+        // 先从 voiceMyBillFolderList 查找到对应的对象，得到对象
+        for (VoiceMyBillFolder f : voiceMyBillFolderList) {
+            if (f.getId() == folderId) {
+                voiceMyBillFolder = f;
+            }
+        }
+        if (voiceMyBillFolder == null) {
+            return false;
+        } else {
+            //新增一个听单记录
+            final VoiceMyBill voiceMyBill = new VoiceMyBill();
+            voiceMyBill.setAddTime(new Date());
+            voiceMyBill.setVoiceResource(voiceResource);
+            //将记录放入到List中，用于放入到文件夹中
+            List<VoiceMyBill> voiceMyBills = new ArrayList<>();
+            voiceMyBills.add(voiceMyBill);
+
+            voiceMyBillFolder.setVoiceMyBillList(voiceMyBills);
+            //开一个线程做数据库IO
+            final VoiceMyBillFolder finalVoiceMyBillFolder = voiceMyBillFolder;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    voiceMyBill.save();
+                    finalVoiceMyBillFolder.save();
+                    selectAllTableData();
+                }
+            }).start();
+            return true;
+        }
+    }
+
+    //添加到历史记录中
+    public static boolean insert2VoiceHistoryBill(VoiceResource voiceResource) {
+        if (voiceResource == null) {
+            return false;
+        } else {
+            for (VoiceHistory v:voiceHistoryList) {
+                if (v.getVoiceResource().getId()==voiceResource.getId()){
+                    return false;
+                }
+            }
+            final VoiceHistory voiceHistory = new VoiceHistory();
+            voiceHistory.setAddTime(new Date());
+            voiceHistory.setVoiceResource(voiceResource);
+            //开一个线程做数据库IO
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    voiceHistory.save();
+                    selectAllTableData();
+                }
+            }).start();
+            return true;
+        }
+    }
+
+
+    public static boolean insertOrDel2VoiceMyCollection(VoiceResource voiceResource){
+        if (voiceResource == null) {
+            return false;
+        } else {
+            for (VoiceCollection v:voiceCollectionList) {
+                if (v.getVoiceResource().getId()==voiceResource.getId()){
+                    v.setVoiceResource(null);
+                    v.update(v.getId());
+                    selectAllTableData();
+                    return false;
+                }
+            }
+            final VoiceCollection voiceCollection = new VoiceCollection();
+            voiceCollection.setAddTime(new Date());
+            voiceCollection.setVoiceResource(voiceResource);
+            //开一个线程做数据库IO
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+            voiceCollection.save();
+            selectAllTableData();
+        }
+            }).start();
+            return true;
         }
     }
 }

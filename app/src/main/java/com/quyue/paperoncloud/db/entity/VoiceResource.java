@@ -2,12 +2,14 @@ package com.quyue.paperoncloud.db.entity;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.Serializable;
+
 /**
  * 声音资源类
  * Created by arter on 2018/6/8.
  */
 
-public class VoiceResource extends DataSupport implements BaseEntity {
+public class VoiceResource extends DataSupport implements BaseEntity, Serializable {
 
     /**
      * 可以进行对象关系映射的数据类型一共有8种，int、short、long、float、double、boolean、String和Date
