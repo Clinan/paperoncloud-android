@@ -50,4 +50,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), VoiceActivity.class);
         startActivity(intent);
     }
+
+    public void scanButton(View view) {
+        Intent intent = new Intent(getApplicationContext(), UnityPlayerActivity.class);
+        startActivity(intent);
+    }
 }
